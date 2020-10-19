@@ -1,22 +1,15 @@
 from algorithms.confidence_ss import confidenceMCMC
 
-import numpy as np
-import numpy.random as npr
-import scipy.stats as sps
-import scipy.special as spsp
-import scipy.misc as spm
-import scipy.optimize as spo
-import numpy.linalg as npl
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
-import random
-import sympy as sym
-import time
+import numpy as np
+import numpy.random as npr
+import numpy.linalg as npl
+import scipy.stats as sps
 import seaborn as sns
 import seaborn.distributions as snsd
-import math as math
 
 # Generate data
 npr.seed(1)
