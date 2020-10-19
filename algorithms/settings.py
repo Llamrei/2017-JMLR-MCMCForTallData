@@ -1,0 +1,3 @@
+DEFAULT_MAX_CHAIN_LENGTH = 10000
+DEFAULT_TIMEOUT = 600  # in seconds -> 10mins
+

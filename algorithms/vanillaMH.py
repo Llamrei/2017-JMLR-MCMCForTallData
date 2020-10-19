@@ -2,11 +2,18 @@ import numpy as np
 import numpy.random as npr
 import time
 
-from algorithms.utils import normalLogLhd
+from settings import DEFAULT_MAX_CHAIN_LENGTH
+from settings import DEFAULT_TIMEOUT
+from utils import normalLogLhd
 
 
 def vanillaMH(
-    inital_theta, x, time_budget=600, chain_length=10000, getLogLhd=normalLogLhd
+    inital_theta,
+    x,
+    stepsize=0.5,
+    time_budget=DEFAULT_TIMEOUT,
+    chain_length=DEFAULT_MAX_CHAIN_LENGTH,
+    getLogLhd=normalLogLhd,
 ):
     """
     Perform traditional isotropic random walk Metropolis
@@ -25,7 +32,7 @@ def vanillaMH(
     """
     N = len(x)
     theta = inital_theta
-    stepsize = 0.5 / np.sqrt(N)
+    stepsize = stepsize / np.sqrt(N)
     S = np.zeros((chain_length, 2))
     acceptance = 0.0
 

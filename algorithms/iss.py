@@ -4,6 +4,8 @@ import numpy.random as npr
 import random as ran
 import time
 
+from settings import DEFAULT_MAX_CHAIN_LENGTH
+from settings import DEFAULT_TIMEOUT
 from utils import normalLogLhd
 from utils import l2_norm_squared
 
@@ -35,8 +37,9 @@ def iss_mcmc(
     n=None,
     k=10,
     eps=20,
-    time_budget=600,
-    chain_length=10000,
+    stepsize=0.5,
+    time_budget=DEFAULT_TIMEOUT,
+    chain_length=DEFAULT_MAX_CHAIN_LENGTH,
     getLogLhd=normalLogLhd,
     sufficient_stat=normal_sufficient_stat,
 ):
@@ -77,7 +80,7 @@ def iss_mcmc(
     # Need indices specifically for exploring the subsamples
     subsample_indices = ran.sample(range(N), n)
 
-    stepsize = 0.5 / np.sqrt(N)
+    stepsize = stepsize / np.sqrt(N)
     theta_chain = np.zeros((chain_length, 2))
     # We dont need to keep the sample chain - might be nice to keep a statistics one?
     # Suff stat here is 2D
@@ -145,41 +148,3 @@ def iss_mcmc(
         i += 1
 
     return (theta_chain, sample_stat_chain)
-
-
-#  Uncomment to test with: python3 .\algorithms\iss.py
-# import numpy as np
-# import numpy.random as npr
-# import scipy.stats as sps
-# import scipy.special as spsp
-# import scipy.misc as spm
-# import scipy.optimize as spo
-# import numpy.linalg as npl
-# import matplotlib as mpl
-# import matplotlib.pyplot as plt
-# import matplotlib.colors as colors
-# import matplotlib.cm as cmx
-# import random
-# import sympy as sym
-# import time
-# import seaborn as sns
-# import seaborn.distributions as snsd
-# import math as math
-
-# # Generate data
-# npr.seed(1)
-# N = 100000
-# # Here is where we make the model mis-specified
-# dataType = "Gaussian"
-# x = npr.randn(N)
-
-# # We store the mean and std deviation for later reference, they are also the MAP and MLE estimates in this case.
-# realMean = np.mean(x)
-# realStd = np.std(x)
-# print("Mean of x =", realMean)
-# print("Std of x =", realStd)
-
-# # Where we will start all theta chains
-# initial_theta = np.array([realMean, np.log(realStd)])
-# iss_chain, stats = iss_mcmc(initial_theta, x)
-
