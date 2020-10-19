@@ -1,4 +1,4 @@
-from algorithms.vanillaMH import vanillaMH
+from algorithms.iss import iss_mcmc
 
 
 #  Uncomment to test with: python3 .\algorithms\iss.py
@@ -35,4 +35,4 @@ print("Std of x =", realStd)
 
 # Where we will start all theta chains
 initial_theta = np.array([realMean, np.log(realStd)])
-ics_chain = vanillaMH(initial_theta, x)
+iss_chain, _ = iss_mcmc(initial_theta, x)

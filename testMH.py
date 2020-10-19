@@ -1,4 +1,4 @@
-from ..iss import iss_mcmc
+from algorithms.vanillaMH import vanillaMH  # For debugging
 
 
 #  Uncomment to test with: python3 .\algorithms\iss.py
@@ -20,6 +20,8 @@ import seaborn as sns
 import seaborn.distributions as snsd
 import math as math
 
+np.seterr(all="raise")
+
 # Generate data
 npr.seed(1)
 N = 100000
@@ -35,4 +37,4 @@ print("Std of x =", realStd)
 
 # Where we will start all theta chains
 initial_theta = np.array([realMean, np.log(realStd)])
-iss_chain, _ = iss_mcmc(initial_theta, x)
+ics_chain = vanillaMH(initial_theta, x, time_budget=10)

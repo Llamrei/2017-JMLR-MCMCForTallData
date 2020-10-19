@@ -6,9 +6,9 @@ import time
 import scipy.optimize as spo
 import sympy as sym
 
-from settings import DEFAULT_MAX_CHAIN_LENGTH
-from settings import DEFAULT_TIMEOUT
-from utils import normalLogLhd
+from .settings import DEFAULT_MAX_CHAIN_LENGTH
+from .settings import DEFAULT_TIMEOUT
+from .utils import normalLogLhd
 
 # Concentration bounds
 def ctBernsteinSerfling(N, n, a, b, sigma, delta):
@@ -127,9 +127,14 @@ def confidenceMCMC(
     acceptance = 0.0
     ns_B = []
 
-    i = 0
     start_time = time.time()
-    while (time.time() - start_time < time_budget) and (i < chain_length):
+    for i in range(chain_length):
+        if time.time() - start_time > time_budget:
+            print(
+                f"Time budget consumed at chain step {i+1}, returning truncated result"
+            )
+            S_B = S_B[:i, :]
+            break
         npr.shuffle(x)
         accepted = 0
         done = 0
@@ -184,7 +189,7 @@ def confidenceMCMC(
         acceptance *= i
         acceptance += accepted
         acceptance /= i + 1
-        if np.mod(i, 1000) == 0:
+        if np.mod(i, chain_length / 10) == 0:
             # Monitor acceptance and average number of samples used
             print(
                 "Iteration",
@@ -199,8 +204,7 @@ def confidenceMCMC(
                 (b - a) / n,
             )
 
-        i += 1
-    return S_B, ns_B
+    return S_B, []
 
 
 # Confidence MCMC with proxy (Bardenet, Doucet, and Holmes, this submission)
@@ -256,9 +260,14 @@ def confidenceMCMCWithProxy(
         ]
     )
 
-    i = 0
     start_time = time.time()
-    while (time.time() - start_time < time_budget) and (i < chain_length):
+    for i in range(chain_length):
+        if time.time() - start_time > time_budget:
+            print(
+                f"Time budget consumed at chain step {i+1}, returning truncated result"
+            )
+            S_B = S_B[:i, :]
+            break
         npr.shuffle(x)
         accepted = 0
         done = 0
@@ -374,7 +383,6 @@ def confidenceMCMCWithProxy(
                 "R/n",
                 R / n,
             )
-        i += 1
 
     return S_B, ns_B
 
@@ -443,8 +451,14 @@ def confidenceMCMCWithProxyDroppedAlong(
     sigmaStar = np.exp(thetaStar[1])
     meanGradStar, meanHessStar = dropProxy(thetaStar, meanx, minx, maxx, meanxSquared)
 
+    start_time = time.time()
     for i in range(chain_length):
-
+        if time.time() - start_time > time_budget:
+            print(
+                f"Time budget consumed at chain step {i+1}, returning truncated result"
+            )
+            S_B = S_B[:i, :]
+            break
         npr.shuffle(x)
         accepted = 0
         done = 0
@@ -575,42 +589,3 @@ def confidenceMCMCWithProxyDroppedAlong(
             )
 
     return S_B, ns_B
-
-
-import numpy as np
-import numpy.random as npr
-import scipy.stats as sps
-import scipy.special as spsp
-import scipy.misc as spm
-import scipy.optimize as spo
-import numpy.linalg as npl
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.colors as colors
-import matplotlib.cm as cmx
-import random
-import sympy as sym
-import time
-import seaborn as sns
-import seaborn.distributions as snsd
-import math as math
-
-# Generate data
-npr.seed(1)
-N = 100000
-# Here is where we make the model mis-specified
-dataType = "Gaussian"
-x = npr.randn(N)
-
-# We store the mean and std deviation for later reference, they are also the MAP and MLE estimates in this case.
-realMean = np.mean(x)
-realStd = np.std(x)
-print("Mean of x =", realMean)
-print("Std of x =", realStd)
-
-# Where we will start all theta chains
-initial_theta = np.array([realMean, np.log(realStd)])
-cs_chain, _ = confidenceMCMC(initial_theta, x)
-ics_chain, _ = confidenceMCMCWithProxy(initial_theta, x)
-dropped_ics_chain, _ = confidenceMCMCWithProxyDroppedAlong(initial_theta, x)
-

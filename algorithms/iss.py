@@ -4,10 +4,10 @@ import numpy.random as npr
 import random as ran
 import time
 
-from settings import DEFAULT_MAX_CHAIN_LENGTH
-from settings import DEFAULT_TIMEOUT
-from utils import normalLogLhd
-from utils import l2_norm_squared
+from .settings import DEFAULT_MAX_CHAIN_LENGTH
+from .settings import DEFAULT_TIMEOUT
+from .utils import normalLogLhd
+from .utils import l2_norm_squared
 
 
 def normal_sufficient_stat(samples):
@@ -92,9 +92,14 @@ def iss_mcmc(
 
     # Delta should really be its own fn
 
-    i = 0
     start_time = time.time()
-    while (time.time() - start_time < time_budget) and (i < chain_length):
+    for i in range(chain_length):
+        if time.time() - start_time > time_budget:
+            print(
+                f"Time budget consumed at chain step {i+1}, returning truncated result"
+            )
+            theta_chain = theta_chain[:i, :]
+            break
         subsample = x[subsample_indices]
 
         prop_sample_indices = symmetric_sample_proposal(subsample_indices, n, k)
@@ -135,7 +140,7 @@ def iss_mcmc(
             theta_chain[i, :] = theta
 
         theta_acceptance = accepted_theta / (i + 1)
-        if np.mod(i, 1000) == 0:
+        if np.mod(i, chain_length / 10) == 0:
             print(
                 "Iteration",
                 i,
@@ -144,7 +149,5 @@ def iss_mcmc(
                 "Sample Acceptance",
                 sample_acceptance,
             )
-
-        i += 1
 
     return (theta_chain, sample_stat_chain)

@@ -2,9 +2,9 @@ import numpy as np
 import numpy.random as npr
 import time
 
-from settings import DEFAULT_MAX_CHAIN_LENGTH
-from settings import DEFAULT_TIMEOUT
-from utils import normalLogLhd
+from .settings import DEFAULT_MAX_CHAIN_LENGTH
+from .settings import DEFAULT_TIMEOUT
+from .utils import normalLogLhd
 
 
 def vanillaMH(
@@ -35,11 +35,17 @@ def vanillaMH(
     stepsize = stepsize / np.sqrt(N)
     S = np.zeros((chain_length, 2))
     acceptance = 0.0
+    accepted = 0
 
-    i = 0
     start_time = time.time()
-    while (time.time() - start_time < time_budget) and (i < chain_length):
-        accepted = 0
+    for i in range(chain_length):
+        if time.time() - start_time > time_budget:
+            print(
+                f"Time budget consumed at chain step {i+1}, returning truncated result"
+            )
+            S = S[:i, :]
+            break
+        stepsize_adapt = 0
         thetaNew = theta
         thetaP = theta + stepsize * npr.randn(2)
         u = npr.rand()
@@ -48,25 +54,22 @@ def vanillaMH(
         )
         Lambda = np.mean(lhds)
         psi = 1.0 / N * np.log(u)
-        if psi > Lambda:
+        if psi < Lambda:
             thetaNew = thetaP
             theta = thetaP
-            accepted = 1
+            accepted += 1
+            stepsize_adapt = 1
             S[i, :] = thetaNew
         else:
             S[i, :] = theta
 
         if i < chain_length / 10:
             # Perform some adaptation of the stepsize in the early iterations
-            stepsize *= np.exp(1.0 / (i + 1) ** 0.6 * (accepted - 0.5))
+            stepsize *= np.exp(1.0 / (i + 1) ** 0.6 * (stepsize_adapt - 0.5))
 
-        acceptance *= i
-        acceptance += accepted
-        acceptance /= i + 1
+        acceptance = accepted / (i + 1)
         if np.mod(i, chain_length / 10) == 0:
             print("Iteration", i, "Acceptance", acceptance)
-
-        i += 1
 
     return S
 

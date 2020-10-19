@@ -1,4 +1,4 @@
-from ..ics import confidenceMCMC
+from algorithms.confidence_ss import confidenceMCMC
 
 import numpy as np
 import numpy.random as npr
