@@ -1,17 +1,30 @@
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 from numpy import histogram as hist
 
 
-def chain_error(ref_chain, evaluated_chain, bins=100):
+def chain_error(ref_chain, evaluated_chain, show_hists=False, title=None):
     """
     Given two one dimensional chains - this function evaluates the area difference in the histograms
 
     Splits the area into optional param `bins` number of bins
     """
-    ref_values, ref_bins = hist(ref_chain, bins=bins, normed=True)
-    alg_values, _ = hist(evaluated_chain, bins=ref_bins, normed=True)
-    alg_error = np.sum(np.diff(ref_bins) * abs(ref_values - alg_values))
+    plt.clf()
+    ref_values, ref_bins, _ = plt.hist(
+        ref_chain, bins="auto", density=True, alpha=0.5, label="Ref"
+    )
+    alg_values, _, _ = plt.hist(
+        evaluated_chain, bins=ref_bins, density=True, alpha=0.5, label="Alg"
+    )
+    # COmputing difference in Reimann sums of histograms
+    alg_error = np.sum(
+        np.diff(ref_bins) * abs(np.array(ref_values) - np.array(alg_values))
+    )
+    if show_hists:
+        plt.legend(loc="upper right")
+        plt.suptitle(title)
+        plt.show()
     return alg_error
 
 

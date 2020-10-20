@@ -204,7 +204,7 @@ def confidenceMCMC(
                 (b - a) / n,
             )
 
-    return S_B, []
+    return S_B, [], i
 
 
 # Confidence MCMC with proxy (Bardenet, Doucet, and Holmes, this submission)
@@ -384,7 +384,7 @@ def confidenceMCMCWithProxy(
                 R / n,
             )
 
-    return S_B, ns_B
+    return S_B, ns_B, i
 
 
 def confidenceMCMCWithProxyDroppedAlong(
@@ -588,4 +588,4 @@ def confidenceMCMCWithProxyDroppedAlong(
                 R / n,
             )
 
-    return S_B, ns_B
+    return S_B, ns_B, i
