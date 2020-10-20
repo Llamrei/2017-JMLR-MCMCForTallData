@@ -28,4 +28,5 @@ print("Std of x =", realStd)
 
 # Where we will start all theta chains
 initial_theta = np.array([realMean, np.log(realStd)])
-ics_chain = vanillaMH(initial_theta, x, time_budget=10)
+ics_chain, b = vanillaMH(initial_theta, x, time_budget=10)
+print(b)

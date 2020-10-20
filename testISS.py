@@ -13,7 +13,7 @@ import seaborn.distributions as snsd
 
 # Generate data
 npr.seed(1)
-N = 100000
+N = 300
 # Here is where we make the model mis-specified
 dataType = "Gaussian"
 x = npr.randn(N)
@@ -26,4 +26,6 @@ print("Std of x =", realStd)
 
 # Where we will start all theta chains
 initial_theta = np.array([realMean, np.log(realStd)])
-iss_chain, _ = iss_mcmc(initial_theta, x)
+iss_chain, _ = iss_mcmc(
+    initial_theta, x, n=17, k=4, chain_length=10 ** 6, time_budget=5
+)

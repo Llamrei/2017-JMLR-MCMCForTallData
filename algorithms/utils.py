@@ -3,11 +3,13 @@ import math
 from numpy import histogram as hist
 
 
-def chain_error(ref_chain, evaluated_chain):
+def chain_error(ref_chain, evaluated_chain, bins=100):
     """
     Given two one dimensional chains - this function evaluates the area difference in the histograms
+
+    Splits the area into optional param `bins` number of bins
     """
-    ref_values, ref_bins = hist(ref_chain, bins="auto", normed=True)
+    ref_values, ref_bins = hist(ref_chain, bins=bins, normed=True)
     alg_values, _ = hist(evaluated_chain, bins=ref_bins, normed=True)
     alg_error = np.sum(np.diff(ref_bins) * abs(ref_values - alg_values))
     return alg_error

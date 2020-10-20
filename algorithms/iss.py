@@ -23,8 +23,12 @@ def normal_sufficient_stat(samples):
     return np.array([np.sum(samples), np.sum(samples * samples)])
 
 
-def symmetric_sample_proposal(sample_indices, n, k):
-    out_sample = set(range(n)) - set(sample_indices)
+def symmetric_sample_proposal(sample_indices, N, k):
+    """
+    Perturbs indices that corresponds to moving from some random set of included samples of size n in from an overall 
+    sample of size N by swapping uniformly random k variables from being included/excluded.
+    """
+    out_sample = set(range(N)) - set(sample_indices)
     in_samples_leaving = ran.sample(sample_indices, k)
     out_samples_joining = ran.sample(out_sample, k)
     in_sample = set(sample_indices) - set(in_samples_leaving) | set(out_samples_joining)
@@ -35,7 +39,7 @@ def iss_mcmc(
     inital_theta,
     x,
     n=None,
-    k=10,
+    k=None,
     eps=20,
     stepsize=0.5,
     time_budget=DEFAULT_TIMEOUT,
@@ -71,7 +75,12 @@ def iss_mcmc(
     statistic_on_full_sample = sufficient_stat(x)
     if n is None:
         n = int(math.sqrt(len(x)))
+    if k is None:
+        k = int(math.sqrt(n))
+    if n > N or k > n or k > N - n:
+        raise ValueError(f"N {N} n {n} k {k} causes mismatch in subsamples")
     scalar = len(x) / n
+    print(f"Running ISS with n = {n}, k = {k}")
 
     def delta(subsample):
         subsample_stat = scalar * sufficient_stat(subsample)
@@ -102,7 +111,8 @@ def iss_mcmc(
             break
         subsample = x[subsample_indices]
 
-        prop_sample_indices = symmetric_sample_proposal(subsample_indices, n, k)
+        # Worked weirdly well with this being n?
+        prop_sample_indices = symmetric_sample_proposal(subsample_indices, N, k)
         prop_subsample = x[prop_sample_indices]
 
         current_sample_delta, stat_on_subsample = delta(subsample)

@@ -71,5 +71,5 @@ def vanillaMH(
         if np.mod(i, chain_length / 10) == 0:
             print("Iteration", i, "Acceptance", acceptance)
 
-    return S
+    return (S, "filler")
 
