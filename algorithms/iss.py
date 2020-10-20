@@ -160,4 +160,4 @@ def iss_mcmc(
                 sample_acceptance,
             )
 
-    return theta_chain, [], i
+    return theta_chain, sample_stat_chain, i
